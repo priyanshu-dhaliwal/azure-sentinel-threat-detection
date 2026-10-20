@@ -1,0 +1,68 @@
+id: 8f2b1c40-1111-4a01-9c05-nsg-open-internet-0001
+name: NSG rule opened to the internet
+description: |
+  A network security group rule was created or modified to allow inbound traffic
+  from 0.0.0.0/0, *, or Internet on a management port. This is the leading
+  indicator of a control bypass — often the first step of an intrusion, and
+  almost always a mistake when it is not.
+severity: High
+status: Available
+requiredDataConnectors:
+  - connectorId: AzureActivity
+    dataTypes:
+      - AzureActivity
+queryFrequency: 15m
+queryPeriod: 15m
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - DefenseEvasion
+  - InitialAccess
+relevantTechniques:
+  - T1562
+  - T1562.004
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: FullName
+        columnName: Caller
+  - entityType: AzureResource
+    fieldMappings:
+      - identifier: ResourceId
+        columnName: NSGResourceId
+query: |
+  let riskyPorts = dynamic(["22", "3389", "5985", "5986", "1433", "3306", "5432", "6379", "9200", "27017", "*"]);
+  AzureActivity
+  | where TimeGenerated > ago(15m)
+  | where OperationNameValue in ("MICROSOFT.NETWORK/NETWORKSECURITYGROUPS/SECURITYRULES/WRITE",
+                                 "MICROSOFT.NETWORK/NETWORKSECURITYGROUPS/WRITE")
+  | where ActivityStatusValue =~ "Success"
+  // AzureActivity exposes the request body as flattened properties; these are the
+  // fields the rule needs. Reading them directly (rather than navigating
+  // parse_json) keeps the query evaluable offline.
+  | extend
+      SourceAddress = tostring(SourceAddress),
+      SourceAddresses = tostring(SourceAddresses),
+      DestPort = tostring(DestPort),
+      DestPorts = tostring(DestPorts),
+      Access = tostring(Access),
+      Direction = tostring(Direction)
+  | where Direction =~ "Inbound" and Access =~ "Allow"
+  | where SourceAddress in ("*", "0.0.0.0/0", "Internet", "any")
+        or SourceAddresses has_any ("0.0.0.0/0", "Internet", "*")
+  | where DestPort in (riskyPorts) or DestPorts has_any (riskyPorts)
+  | project TimeGenerated, Caller, NSGResourceId = tostring(ResourceId),
+            OperationNameValue, SourceAddress, DestPort, DestPorts
+tuning:
+  rationale: |
+    Scoped to management/data ports so an intentional 443 rule on an app gateway
+    does not alert. `*` is included because a fully open rule is worse than a
+    specific one and is never legitimate on an NSG.
+  falsePositives:
+    - "A deliberate public web tier rule on 443/80 (excluded by the port list)"
+    - "Infrastructure-as-code applying a reviewed rule — still worth a ticket"
+  thresholdHistory:
+    - date: 2025-06-11
+      change: "initial"
+      reason: "created after a lab NSG was opened on 3389 and found in 4 minutes"
+  containment: notify-only

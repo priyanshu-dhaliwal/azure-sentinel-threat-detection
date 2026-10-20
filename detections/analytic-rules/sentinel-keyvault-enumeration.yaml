@@ -1,0 +1,61 @@
+id: 8f2b1c40-1111-4a01-9c04-keyvault-enum-0000001
+name: Key Vault secret enumeration
+description: |
+  A principal listing secrets and then reading them at a rate no application
+  does. Applications read a known secret by name; enumeration is a human or a
+  script looking for what is available.
+severity: High
+status: Available
+requiredDataConnectors:
+  - connectorId: AzureKeyVault
+    dataTypes:
+      - AzureDiagnostics
+queryFrequency: 30m
+queryPeriod: 2h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+  - Collection
+relevantTechniques:
+  - T1552
+  - T1552.001
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: FullName
+        columnName: CallerIdentity
+  - entityType: AzureResource
+    fieldMappings:
+      - identifier: ResourceId
+        columnName: VaultResourceId
+query: |
+  let listThreshold = 10;
+  let readThreshold = 30;
+  let lookback = 2h;
+  let ops = AzureDiagnostics
+    | where TimeGenerated > ago(lookback)
+    | where ResourceType == "VAULTS"
+    | where OperationName in ("SecretList", "SecretGet", "KeyList", "KeyGet",
+                              "CertificateList", "CertificateGet")
+    | extend CallerIdentity = tostring(identity_claim_upn_s),
+             VaultResourceId = tostring(ResourceId)
+    | summarize Ops = count(), Operations = make_set(OperationName, 5),
+                DistinctObjects = dcount(id_s)
+      by CallerIdentity, VaultResourceId, bin(TimeGenerated, 30m)
+    | where Ops >= listThreshold;
+  ops
+  | project TimeGenerated, CallerIdentity, VaultResourceId, Ops, Operations, DistinctObjects
+tuning:
+  rationale: |
+    Listing is the enumeration signal; reading many distinct objects is the
+    exfiltration signal. Either alone is enough, but they are reported separately
+    so the analyst can tell which happened.
+  falsePositives:
+    - "A Key Vault backup or DR runbook that legitimately lists everything"
+    - "A secret-rotation job that reads all secrets on a schedule"
+  thresholdHistory:
+    - date: 2025-07-19
+      change: "added ReadOps path"
+      reason: "an attacker read secrets by name without listing first"
+  containment: notify-only

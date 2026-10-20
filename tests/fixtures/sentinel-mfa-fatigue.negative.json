@@ -1,0 +1,23 @@
+[
+  {
+    "TimeGenerated": "2025-10-01T10:00:00Z",
+    "ResultType": "500121",
+    "UserPrincipalName": "carol@contoso.com",
+    "IPAddress": "198.51.100.8",
+    "SourceIP": "198.51.100.8"
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:01:00Z",
+    "ResultType": "500121",
+    "UserPrincipalName": "carol@contoso.com",
+    "IPAddress": "198.51.100.8",
+    "SourceIP": "198.51.100.8"
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:20:00Z",
+    "ResultType": "0",
+    "UserPrincipalName": "carol@contoso.com",
+    "IPAddress": "198.51.100.8",
+    "SourceIP": "198.51.100.8"
+  }
+]

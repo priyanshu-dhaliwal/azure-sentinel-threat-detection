@@ -1,0 +1,12 @@
+[
+  {
+    "TimeGenerated": "2025-10-01T10:00:00Z",
+    "OperationNameValue": "MICROSOFT.AUTHORIZATION/ROLEASSIGNMENTS/WRITE",
+    "ActivityStatusValue": "Success",
+    "Caller": "insider@contoso.com",
+    "CallerIpAddress": "203.0.113.44",
+    "Scope": "/subscriptions/abc",
+    "RoleDef": "8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
+    "GrantedPrincipal": "attacker-sp"
+  }
+]

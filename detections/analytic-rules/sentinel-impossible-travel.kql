@@ -1,0 +1,30 @@
+  let maxSpeedKmh = 1000;   // faster than commercial flight + connection time
+  SigninLogs
+  | where TimeGenerated > ago(24h)
+  | where ResultType == "0"
+  | where isnotempty(LocationDetails.geoCoordinates.latitude)
+  | project TimeGenerated, UserPrincipalName, SourceIP = tostring(IPAddress),
+            Lat = todouble(LocationDetails.geoCoordinates.latitude),
+            Lon = todouble(LocationDetails.geoCoordinates.longitude),
+            City = tostring(LocationDetails.city),
+            Country = tostring(LocationDetails.countryOrRegion)
+  | sort by UserPrincipalName asc, TimeGenerated asc
+  | serialize
+  | extend PrevTime = prev(TimeGenerated, 1),
+           PrevLat = prev(Lat, 1),
+           PrevLon = prev(Lon, 1),
+           PrevCity = prev(City, 1),
+           PrevCountry = prev(Country, 1),
+           PrevUser = prev(UserPrincipalName, 1)
+  | where UserPrincipalName == PrevUser
+  | extend HoursApart = datetime_diff('second', TimeGenerated, PrevTime) / 3600.0
+  | where HoursApart > 0 and HoursApart < 24
+  // Haversine, in kilometres.
+  | extend DistanceKm = 6371.0 * 2 * asin(sqrt(
+        pow(sin(radians(Lat - PrevLat) / 2), 2) +
+        cos(radians(PrevLat)) * cos(radians(Lat)) * pow(sin(radians(Lon - PrevLon) / 2), 2)))
+  | extend SpeedKmh = DistanceKm / HoursApart
+  | where SpeedKmh > maxSpeedKmh and DistanceKm > 500
+  | project TimeGenerated, UserPrincipalName, SourceIP, City, Country,
+            PrevCity, PrevCountry, PrevTime, DistanceKm = round(DistanceKm, 0),
+            SpeedKmh = round(SpeedKmh, 0)

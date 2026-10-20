@@ -1,0 +1,30 @@
+[
+  {
+    "TimeGenerated": "2025-10-01T09:00:00Z",
+    "ResultType": "0",
+    "UserPrincipalName": "bob@contoso.com",
+    "IPAddress": "198.51.100.1",
+    "LocationDetails": {
+      "geoCoordinates": {
+        "latitude": 28.6,
+        "longitude": 77.2
+      },
+      "city": "Delhi",
+      "countryOrRegion": "IN"
+    }
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:00:00Z",
+    "ResultType": "0",
+    "UserPrincipalName": "bob@contoso.com",
+    "IPAddress": "198.51.100.9",
+    "LocationDetails": {
+      "geoCoordinates": {
+        "latitude": 28.7,
+        "longitude": 77.3
+      },
+      "city": "Gurugram",
+      "countryOrRegion": "IN"
+    }
+  }
+]

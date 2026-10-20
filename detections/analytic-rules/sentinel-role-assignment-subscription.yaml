@@ -1,0 +1,63 @@
+id: 8f2b1c40-1111-4a01-9c06-role-assignment-sub-001
+name: Role assignment at subscription or management group scope
+description: |
+  Privilege is granted at subscription or management-group scope. Legitimate in
+  a platform subscription during a deliberate change; never legitimate as a
+  quiet background event. This is the insider-threat canary from the zero-trust
+  landing zone project, promoted into a detection.
+severity: High
+status: Available
+requiredDataConnectors:
+  - connectorId: AzureActivity
+    dataTypes:
+      - AzureActivity
+queryFrequency: 15m
+queryPeriod: 15m
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - Persistence
+  - PrivilegeEscalation
+relevantTechniques:
+  - T1098
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: FullName
+        columnName: Caller
+  - entityType: Account
+    fieldMappings:
+      - identifier: FullName
+        columnName: GrantedPrincipal
+query: |
+  let privilegedRoles = dynamic([
+    "Owner", "Contributor", "User Access Administrator",
+    "Role Based Access Control Administrator", "8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
+    "b24988ac-6180-42a0-ab88-20f7382dd24c", "18d7d88d-d35e-4fb5-a5c3-7773c20a72d9"
+  ]);
+  AzureActivity
+  | where TimeGenerated > ago(15m)
+  | where OperationNameValue has "MICROSOFT.AUTHORIZATION/ROLEASSIGNMENTS/WRITE"
+  | where ActivityStatusValue =~ "Success"
+  // Scope / RoleDef / GrantedPrincipal are surfaced by the Activity Log
+  // connector as flattened request-body properties.
+  | extend Scope = tostring(Scope),
+           RoleDef = tostring(RoleDef),
+           GrantedPrincipal = tostring(GrantedPrincipal)
+  | where Scope startswith "/subscriptions/" and Scope !contains "/resourceGroups/"
+  | where RoleDef has_any (privilegedRoles)
+  | project TimeGenerated, Caller, GrantedPrincipal, Scope, RoleDef,
+            OperationNameValue, CallerIpAddress
+tuning:
+  rationale: |
+    Resource-group-scope grants are excluded: they are the normal way to grant
+    access and alerting on them would drown the rule. Subscription-scope grants
+    of privileged roles are rare enough that every one deserves a look.
+  falsePositives:
+    - "Platform team onboarding a new subscription (a known change window)"
+    - "Terraform applying a reviewed platform change"
+  thresholdHistory:
+    - date: 2025-09-02
+      change: "added RBAC Administrator role id"
+      reason: "an actor granted themselves RBAC Admin then escalated in two steps"
+  containment: notify-only

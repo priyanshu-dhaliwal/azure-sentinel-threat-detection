@@ -1,0 +1,98 @@
+[
+  {
+    "TimeGenerated": "2025-10-01T10:00:00Z",
+    "ResourceType": "VAULTS",
+    "OperationName": "SecretList",
+    "CallerIdentity": "attacker@contoso.com",
+    "VaultResourceId": "/sub/vaults/kv1",
+    "id_s": "secret-0"
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:00:00Z",
+    "ResourceType": "VAULTS",
+    "OperationName": "SecretList",
+    "CallerIdentity": "attacker@contoso.com",
+    "VaultResourceId": "/sub/vaults/kv1",
+    "id_s": "secret-1"
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:00:00Z",
+    "ResourceType": "VAULTS",
+    "OperationName": "SecretList",
+    "CallerIdentity": "attacker@contoso.com",
+    "VaultResourceId": "/sub/vaults/kv1",
+    "id_s": "secret-2"
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:00:00Z",
+    "ResourceType": "VAULTS",
+    "OperationName": "SecretList",
+    "CallerIdentity": "attacker@contoso.com",
+    "VaultResourceId": "/sub/vaults/kv1",
+    "id_s": "secret-3"
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:00:00Z",
+    "ResourceType": "VAULTS",
+    "OperationName": "SecretList",
+    "CallerIdentity": "attacker@contoso.com",
+    "VaultResourceId": "/sub/vaults/kv1",
+    "id_s": "secret-4"
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:00:00Z",
+    "ResourceType": "VAULTS",
+    "OperationName": "SecretList",
+    "CallerIdentity": "attacker@contoso.com",
+    "VaultResourceId": "/sub/vaults/kv1",
+    "id_s": "secret-5"
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:00:00Z",
+    "ResourceType": "VAULTS",
+    "OperationName": "SecretList",
+    "CallerIdentity": "attacker@contoso.com",
+    "VaultResourceId": "/sub/vaults/kv1",
+    "id_s": "secret-6"
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:00:00Z",
+    "ResourceType": "VAULTS",
+    "OperationName": "SecretList",
+    "CallerIdentity": "attacker@contoso.com",
+    "VaultResourceId": "/sub/vaults/kv1",
+    "id_s": "secret-7"
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:00:00Z",
+    "ResourceType": "VAULTS",
+    "OperationName": "SecretList",
+    "CallerIdentity": "attacker@contoso.com",
+    "VaultResourceId": "/sub/vaults/kv1",
+    "id_s": "secret-8"
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:00:00Z",
+    "ResourceType": "VAULTS",
+    "OperationName": "SecretList",
+    "CallerIdentity": "attacker@contoso.com",
+    "VaultResourceId": "/sub/vaults/kv1",
+    "id_s": "secret-9"
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:00:00Z",
+    "ResourceType": "VAULTS",
+    "OperationName": "SecretList",
+    "CallerIdentity": "attacker@contoso.com",
+    "VaultResourceId": "/sub/vaults/kv1",
+    "id_s": "secret-10"
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:00:00Z",
+    "ResourceType": "VAULTS",
+    "OperationName": "SecretList",
+    "CallerIdentity": "attacker@contoso.com",
+    "VaultResourceId": "/sub/vaults/kv1",
+    "id_s": "secret-11"
+  }
+]

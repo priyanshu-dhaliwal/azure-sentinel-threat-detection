@@ -1,0 +1,63 @@
+id: 8f2b1c40-1111-4a01-9c03-mfa-fatigue-00001
+name: MFA fatigue — repeated denied prompts followed by a success
+description: |
+  An attacker who has the password spams MFA prompts until the user approves one
+  out of exhaustion. The pattern is: many denied prompts in a short window,
+  then a success from the same IP.
+severity: High
+status: Available
+requiredDataConnectors:
+  - connectorId: AzureActiveDirectory
+    dataTypes:
+      - SigninLogs
+      - AADNonInteractiveUserSignInLogs
+queryFrequency: 1h
+queryPeriod: 2h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - CredentialAccess
+relevantTechniques:
+  - T1621
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: FullName
+        columnName: UserPrincipalName
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: SourceIP
+query: |
+  let deniedThreshold = 5;
+  let lookback = 2h;
+  let denials = SigninLogs
+    | where TimeGenerated > ago(lookback)
+    | where ResultType == "500121"           // MFA denied / user declined
+    | summarize Denials = count(), FirstDenial = min(TimeGenerated),
+                LastDenial = max(TimeGenerated)
+      by UserPrincipalName, SourceIP = tostring(IPAddress)
+    | where Denials >= deniedThreshold;
+  let successes = SigninLogs
+    | where TimeGenerated > ago(lookback)
+    | where ResultType == "0"
+    | project UserPrincipalName, SuccessIP = tostring(IPAddress), SuccessTime = TimeGenerated;
+  denials
+  | join kind=inner successes on UserPrincipalName
+  | where SuccessIP == SourceIP
+  | where SuccessTime between (LastDenial .. (LastDenial + 30m))
+  | project SuccessTime, UserPrincipalName, SourceIP, Denials, FirstDenial, LastDenial
+tuning:
+  rationale: |
+    Five denials is high enough that a user tapping "deny" by mistake twice does
+    not alert, and low enough that a real fatigue attack (usually 10-30 prompts)
+    is caught before it succeeds. The join on the SAME IP is what makes this a
+    fatigue attack rather than a user who denied prompts at home and then signed
+    in at the office.
+  falsePositives:
+    - "A user with a broken authenticator app that auto-denies, then signs in on a new device"
+  thresholdHistory:
+    - date: 2025-10-01
+      change: "initial"
+      reason: "created after the Okta-style fatigue campaigns in Q3"
+  containment: notify-only

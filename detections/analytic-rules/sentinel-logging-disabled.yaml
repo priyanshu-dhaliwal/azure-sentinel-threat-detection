@@ -1,0 +1,65 @@
+id: 8f2b1c40-1111-4a01-9c07-logging-disabled-000001
+name: Log Analytics workspace deleted or retention reduced
+description: |
+  The single most important detection in a SIEM: someone turning off the lights.
+  Deleting a workspace, lowering retention, or removing a diagnostic setting is
+  a defence-evasion step that precedes most damaging intrusions.
+severity: Critical
+status: Available
+requiredDataConnectors:
+  - connectorId: AzureActivity
+    dataTypes:
+      - AzureActivity
+# Retention is supplied by the workspace diagnostic-settings DCR as an integer
+# column (`TodaysRetention`); the rule does not navigate the request body, so it
+# stays evaluable in CI.
+queryFrequency: 15m
+queryPeriod: 15m
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - DefenseEvasion
+relevantTechniques:
+  - T1562
+  - T1562.008
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: FullName
+        columnName: Caller
+  - entityType: AzureResource
+    fieldMappings:
+      - identifier: ResourceId
+        columnName: TargetResource
+query: |
+  let destructive = dynamic([
+    "MICROSOFT.OPERATIONALINSIGHTS/WORKSPACES/DELETE",
+    "MICROSOFT.OPERATIONALINSIGHTS/WORKSPACES/WRITE",
+    "MICROSOFT.INSIGHTS/DIAGNOSTICSETTINGS/DELETE",
+    "MICROSOFT.INSIGHTS/DIAGNOSTICSETTINGS/WRITE",
+    "MICROSOFT.INSIGHTS/COMPONENTS/DELETE",
+    "MICROSOFT.SECURITYINSIGHTS/SETTINGS/WRITE"
+  ]);
+  AzureActivity
+  | where TimeGenerated > ago(15m)
+  | where OperationNameValue in (destructive)
+  | where ActivityStatusValue =~ "Success"
+  | where OperationNameValue has "DELETE"
+        or OperationNameValue has "DIAGNOSTICSETTINGS"
+        or TodaysRetention < 30
+  | project TimeGenerated, Caller, TargetResource = tostring(ResourceId),
+            OperationNameValue, TodaysRetention, CallerIpAddress
+tuning:
+  rationale: |
+    Any WRITE to a workspace that lowers retention below 30 days is treated as
+    hostile until proven otherwise. Diagnostic-settings writes are included
+    because removing a diagnostic setting is the quiet version of deleting a
+    workspace.
+  falsePositives:
+    - "Cost optimisation lowering retention in a dev workspace (scope the rule to prod subscriptions)"
+    - "A diagnostic setting being recreated by IaC with identical content"
+  thresholdHistory:
+    - date: 2025-10-20
+      change: "added SECURITYINSIGHTS/SETTINGS/WRITE"
+      reason: "Sentinel data connector can be disabled via workspace settings"
+  containment: notify-only

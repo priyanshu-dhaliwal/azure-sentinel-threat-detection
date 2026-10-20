@@ -1,0 +1,30 @@
+[
+  {
+    "TimeGenerated": "2025-10-01T10:00:00Z",
+    "ResultType": "0",
+    "UserPrincipalName": "alice@contoso.com",
+    "IPAddress": "203.0.113.1",
+    "LocationDetails": {
+      "geoCoordinates": {
+        "latitude": 28.6,
+        "longitude": 77.2
+      },
+      "city": "Delhi",
+      "countryOrRegion": "IN"
+    }
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:30:00Z",
+    "ResultType": "0",
+    "UserPrincipalName": "alice@contoso.com",
+    "IPAddress": "203.0.113.2",
+    "LocationDetails": {
+      "geoCoordinates": {
+        "latitude": 51.5,
+        "longitude": -0.1
+      },
+      "city": "London",
+      "countryOrRegion": "GB"
+    }
+  }
+]

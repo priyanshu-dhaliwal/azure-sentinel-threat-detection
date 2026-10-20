@@ -1,0 +1,19 @@
+[
+  {
+    "TimeGenerated": "2025-10-01T10:00:00Z",
+    "OperationNameValue": "MICROSOFT.NETWORK/NETWORKSECURITYGROUPS/SECURITYRULES/WRITE",
+    "ActivityStatusValue": "Success",
+    "Caller": "platform@contoso.com",
+    "ResourceId": "/sub/rg/nsg/rule2",
+    "rule": {
+      "sourceAddressPrefix": "10.10.0.0/16",
+      "destinationPortRange": "443",
+      "access": "Allow",
+      "direction": "Inbound"
+    },
+    "SourceAddress": "10.10.0.0/16",
+    "DestPort": "443",
+    "Access": "Allow",
+    "Direction": "Inbound"
+  }
+]

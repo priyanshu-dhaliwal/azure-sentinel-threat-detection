@@ -1,0 +1,74 @@
+id: 8f2b1c40-1111-4a01-9c02-impossible-travel-001
+name: Impossible travel sign-in
+description: |
+  Two successful sign-ins from geographically distant locations within a period
+  too short for physical travel. Uses distance and implied speed rather than a
+  list of "suspicious" countries.
+severity: Medium
+status: Available
+requiredDataConnectors:
+  - connectorId: AzureActiveDirectory
+    dataTypes:
+      - SigninLogs
+queryFrequency: 1h
+queryPeriod: 24h
+triggerOperator: gt
+triggerThreshold: 0
+tactics:
+  - InitialAccess
+  - CredentialAccess
+relevantTechniques:
+  - T1078
+  - T1078.004
+entityMappings:
+  - entityType: Account
+    fieldMappings:
+      - identifier: FullName
+        columnName: UserPrincipalName
+  - entityType: IP
+    fieldMappings:
+      - identifier: Address
+        columnName: SourceIP
+query: |
+  let maxSpeedKmh = 1000;
+  let minDistanceKm = 500;
+  SigninLogs
+  | where TimeGenerated > ago(24h)
+  | where ResultType == "0"
+  | project TimeGenerated, UserPrincipalName, SourceIP = tostring(IPAddress),
+            Lat = todouble(GeoLat), Lon = todouble(GeoLong),
+            City = tostring(CityName), Country = tostring(CountryName)
+  | where isnotempty(Lat) and isnotempty(Lon)
+  | summarize Signins = count(), FirstSignin = min(TimeGenerated),
+              LastSignin = max(TimeGenerated),
+              MinLat = min(Lat), MaxLat = max(Lat),
+              MinLon = min(Lon), MaxLon = max(Lon),
+              Cities = dcount(CityName)
+    by UserPrincipalName
+  | extend DistanceKm = 6371.0 * 2 * asin(sqrt(
+        pow(sin(radians(MaxLat - MinLat) / 2), 2) +
+        cos(radians(MinLat)) * cos(radians(MaxLat)) *
+        pow(sin(radians(MaxLon - MinLon) / 2), 2)))
+  | extend HoursApart = datetime_diff('second', LastSignin, FirstSignin) / 3600.0
+  | where DistanceKm > minDistanceKm and HoursApart > 0
+  | extend SpeedKmh = DistanceKm / HoursApart
+  | where SpeedKmh > maxSpeedKmh
+  | project UserPrincipalName, FirstSignin, LastSignin, DistanceKm = round(DistanceKm, 0),
+            SpeedKmh = round(SpeedKmh, 0), Cities
+tuning:
+  rationale: |
+    Distance > 500 km removes the "two offices 40 km apart with a VPN hop" case.
+    Speed > 1000 km/h removes the legitimate "flew to Singapore overnight" case
+    (average ~800 km/h plus airport time).
+  falsePositives:
+    - "Corporate VPN with egress in a different country from the user's physical location"
+    - "Mobile carrier CGNAT that geolocates to a national capital"
+    - "A user on a fast train with a roaming SIM"
+  thresholdHistory:
+    - date: 2025-08-02
+      change: "added minDistanceKm > 500"
+      reason: "Gurugram/Delhi pair geolocates 30 km apart and fired daily"
+    - date: 2025-10-21
+      change: "replaced serialize/prev with a per-user bounding-box aggregation"
+      reason: "serialize/prev cannot be evaluated offline, so the rule was untested"
+  containment: notify-only

@@ -1,0 +1,51 @@
+[
+  {
+    "TimeGenerated": "2025-10-01T10:00:00Z",
+    "ResultType": "500121",
+    "UserPrincipalName": "bob@contoso.com",
+    "IPAddress": "203.0.113.9",
+    "SourceIP": "203.0.113.9"
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:01:00Z",
+    "ResultType": "500121",
+    "UserPrincipalName": "bob@contoso.com",
+    "IPAddress": "203.0.113.9",
+    "SourceIP": "203.0.113.9"
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:02:00Z",
+    "ResultType": "500121",
+    "UserPrincipalName": "bob@contoso.com",
+    "IPAddress": "203.0.113.9",
+    "SourceIP": "203.0.113.9"
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:03:00Z",
+    "ResultType": "500121",
+    "UserPrincipalName": "bob@contoso.com",
+    "IPAddress": "203.0.113.9",
+    "SourceIP": "203.0.113.9"
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:04:00Z",
+    "ResultType": "500121",
+    "UserPrincipalName": "bob@contoso.com",
+    "IPAddress": "203.0.113.9",
+    "SourceIP": "203.0.113.9"
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:05:00Z",
+    "ResultType": "500121",
+    "UserPrincipalName": "bob@contoso.com",
+    "IPAddress": "203.0.113.9",
+    "SourceIP": "203.0.113.9"
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:20:00Z",
+    "ResultType": "0",
+    "UserPrincipalName": "bob@contoso.com",
+    "IPAddress": "203.0.113.9",
+    "SourceIP": "203.0.113.9"
+  }
+]

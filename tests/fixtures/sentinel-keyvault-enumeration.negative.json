@@ -1,0 +1,26 @@
+[
+  {
+    "TimeGenerated": "2025-10-01T10:00:00Z",
+    "ResourceType": "VAULTS",
+    "OperationName": "SecretGet",
+    "CallerIdentity": "app-identity",
+    "VaultResourceId": "/sub/vaults/kv1",
+    "id_s": "db-password"
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:00:00Z",
+    "ResourceType": "VAULTS",
+    "OperationName": "SecretGet",
+    "CallerIdentity": "app-identity",
+    "VaultResourceId": "/sub/vaults/kv1",
+    "id_s": "db-password"
+  },
+  {
+    "TimeGenerated": "2025-10-01T10:00:00Z",
+    "ResourceType": "VAULTS",
+    "OperationName": "SecretGet",
+    "CallerIdentity": "app-identity",
+    "VaultResourceId": "/sub/vaults/kv1",
+    "id_s": "db-password"
+  }
+]
